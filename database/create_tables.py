@@ -2,24 +2,21 @@ import psycopg2
 from psycopg2 import sql
 from config import db_config
 
-# Подключение к базе данных
 conn = psycopg2.connect(
-    dbname='postgres',  # Подключаемся к системной базе данных
+    dbname='postgres',
     user=db_config['user'],
     password=db_config['password'],
     host=db_config['host'],
     port=db_config['port'],
 )
 
-conn.autocommit = True  # Включаем режим автокоммита для создания базы данных
+conn.autocommit = True
 cur = conn.cursor()
 
-# Проверка существования базы данных
 db_name = db_config['dbname']
 cur.execute(f"SELECT 1 FROM pg_database WHERE datname = '{db_name}'")
 exists = cur.fetchone()
 
-# Если база данных не существует, создаем её
 if not exists:
     cur.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(db_name)))
     print(f"Database '{db_name}' created successfully!")
@@ -29,7 +26,6 @@ else:
 cur.close()
 conn.close()
 
-# Подключаемся к созданной или существующей базе данных
 conn = psycopg2.connect(
     dbname=db_config['dbname'],
     user=db_config['user'],
@@ -40,7 +36,6 @@ conn = psycopg2.connect(
 
 cur = conn.cursor()
 
-# Создание таблиц, если они еще не существуют
 create_tables_sql = '''
 CREATE TABLE IF NOT EXISTS public.materials
 (
@@ -120,7 +115,6 @@ with conn.cursor() as cur:
     cur.execute(create_tables_sql)
     conn.commit()
 
-# Закрытие соединения
 cur.close()
 conn.close()
 
